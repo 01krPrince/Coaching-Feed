@@ -10,8 +10,29 @@ const { initSocket } = require("./socket/index");
 const app        = express();
 const httpServer = http.createServer(app);  // ← shared server for Express + Socket.IO
 
+// 🌟 Dynamic Allowed Origins Setup
+const allowedOrigins = [
+  "http://localhost:3000", 
+  "http://192.168.0.118:3000"
+];
+
+// Agar Render par env variable set hai, toh use list mein push karein
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+  // Kuch log slash laga dete hain end mein, isliye safe side bina slash wala bhi add kar dete hain
+  allowedOrigins.push(process.env.CLIENT_URL.replace(/\/$/, ""));
+}
+
 app.use(cors({ 
-  origin: ["http://localhost:3000", "http://192.168.0.118:3000"], // Dono local URLs allow karein
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ["GET", "POST", "OPTIONS"]
 }));

@@ -3,12 +3,11 @@ const { createClient } = require("redis");
 const client = createClient({ 
   url: process.env.REDIS_URL || "redis://localhost:6379",
   socket: {
-    // Agar local Redis nahi chal raha toh endless reconnect karke loop na banaye
     reconnectStrategy: (retries) => {
       if (retries > 2) {
         return new Error("Redis connection abandoned after 2 attempts");
       }
-      return 1000; // 1 second baad try karein
+      return 1000;
     }
   }
 });

@@ -61,3 +61,16 @@ mongoose
     console.error("❌ MongoDB connection failed:", err);
     process.exit(1);
   });
+
+  // 🔄 Self-Ping Routine to prevent Render backend from sleeping
+const https = require("https");
+
+const BACKEND_URL = "https://coaching-feed-m57g.onrender.com";
+
+setInterval(() => {
+  https.get(BACKEND_URL, (res) => {
+    console.log(`[Self-Ping]: Keep-Alive trigger sent. Status Code: ${res.statusCode}`);
+  }).on("error", (err) => {
+    console.error("[Self-Ping]: Keep-Alive error: ", err.message);
+  });
+}, 10 * 60 * 1000);
